@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.delay
 import au.edu.jcu.cp3406_cp5307_utilityappstartertemplate.ui.theme.CP3406_CP5603UtilityAppStarterTemplateTheme
 
 class MainActivity : ComponentActivity() {
@@ -101,6 +102,19 @@ fun UtilityApp() {
 @Composable
 fun RunScreen() {
     var runState by remember { mutableStateOf("Not Started") }
+    var elapsedSeconds by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(runState) {
+        while (runState == "Running") {
+            delay(1000)
+            elapsedSeconds++
+        }
+    }
+
+    val hours = elapsedSeconds / 3600
+    val minutes = (elapsedSeconds % 3600) / 60
+    val seconds = elapsedSeconds % 60
+    val formattedTime = String.format("%02d:%02d:%02d", hours, minutes, seconds)
 
     Column(
         modifier = Modifier
@@ -115,14 +129,10 @@ fun RunScreen() {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp)
-            ) {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(20.dp)) {
                 Text("Status: $runState")
-                Text("Time: 00:00:00")
+                Text("Time: $formattedTime")
                 Text("Distance: 0.00 km")
                 Text("Pace: 0:00 /km")
                 Text("Speed: 0.0 km/h")
@@ -135,8 +145,12 @@ fun RunScreen() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { runState = "Running" },
-            modifier = Modifier.fillMaxWidth()
+            onClick = {
+                elapsedSeconds = 0
+                runState = "Running"
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = runState == "Not Started" || runState == "Ended"
         ) {
             Text("Start Run")
         }
