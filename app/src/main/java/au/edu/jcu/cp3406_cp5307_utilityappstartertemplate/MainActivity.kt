@@ -41,6 +41,8 @@ import androidx.compose.ui.Alignment
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Switch
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.LinearProgressIndicator
 import au.edu.jcu.cp3406_cp5307_utilityappstartertemplate.ui.theme.CP3406_CP5603UtilityAppStarterTemplateTheme
 
 class MainActivity : ComponentActivity() {
@@ -245,34 +247,157 @@ fun RunScreen( onSaveRun: (RunRecord) -> Unit) {
 }
 
 @Composable
-fun RecordsScreen( runRecords: List<RunRecord>) {
+fun RecordsScreen(
+    runRecords: List<RunRecord>
+) {
+    var showGoalScreen by remember { mutableStateOf(false) }
+
+    if (showGoalScreen) {
+        GoalScreen(
+            onBack = {
+                showGoalScreen = false
+            }
+        )
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp)
+        ) {
+            Text("Run Records", style = MaterialTheme.typography.headlineMedium)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    showGoalScreen = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Set Goal")
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            if (runRecords.isEmpty()) {
+                Text("No run records yet.")
+            } else {
+                runRecords.forEach { record ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text("Date: ${record.date}")
+                            Text("Time: ${record.time}")
+                            Text("Duration: ${record.duration}")
+                            Text("Distance: ${record.distance}")
+                            Text("Pace: ${record.pace}")
+                            Text("Calories: ${record.calories}")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun GoalScreen(
+    onBack: () -> Unit
+) {
+    var targetWeight by remember { mutableStateOf("") }
+    var targetDays by remember { mutableStateOf("") }
+    var useKg by remember { mutableStateOf(true) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(20.dp)
     ) {
-        Text("Running Records", style = MaterialTheme.typography.headlineMedium)
-
-        Card {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text("Example Record 1")
-                Text("Distance: 3 km")
-                Text("Time: 24 minutes")
-                Text("Pace: 8.00 min/km")
-            }
+        Button(
+            onClick = onBack
+        ) {
+            Text("Back to Records")
         }
 
-        Card {
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "Running Goals",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        OutlinedTextField(
+            value = targetWeight,
+            onValueChange = { targetWeight = it },
+            label = {
+                Text(
+                    if (useKg) "Target Weight (kg)" else "Target Weight (lb)"
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        OutlinedTextField(
+            value = targetDays,
+            onValueChange = { targetDays = it },
+            label = { Text("Target Days") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Use KG")
+            Spacer(modifier = Modifier.width(10.dp))
+            Switch(
+                checked = useKg,
+                onCheckedChange = { useKg = it }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text("Goal Progress")
+
+        LinearProgressIndicator(
+            progress = { 0.35f },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text("35% Completed")
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text("Example Record 2")
-                Text("Distance: 5 km")
-                Text("Time: 40 minutes")
-                Text("Pace: 8.00 min/km")
+                Text("⭐ Premium Goal Tracking")
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text("Unlock advanced weight tracking, coaching, progress charts, and detailed analytics.")
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Button(
+                    onClick = { }
+                ) {
+                    Text("Upgrade to Premium")
+                }
             }
         }
     }
