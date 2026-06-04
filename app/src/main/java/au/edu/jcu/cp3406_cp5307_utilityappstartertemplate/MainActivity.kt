@@ -39,6 +39,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Switch
 import au.edu.jcu.cp3406_cp5307_utilityappstartertemplate.ui.theme.CP3406_CP5603UtilityAppStarterTemplateTheme
 
 class MainActivity : ComponentActivity() {
@@ -278,18 +280,66 @@ fun RecordsScreen( runRecords: List<RunRecord>) {
 
 @Composable
 fun SettingsScreen() {
+    var autoPause by remember { mutableStateOf(false) }
+    var audioCues by remember { mutableStateOf(true) }
+    var currentPace by remember { mutableStateOf(true) }
+    var cadence by remember { mutableStateOf(false) }
+    var calories by remember { mutableStateOf(true) }
+    var steps by remember { mutableStateOf(true) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(20.dp)
     ) {
-        Text("Settings", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = "Settings",
+            style = MaterialTheme.typography.headlineMedium
+        )
 
-        Text("App Preferences")
-        Text("Distance unit: Kilometres")
-        Text("Future option: Miles")
-        Text("Future option: Dark mode")
-        Text("Future option: Weather alerts")
+        Spacer(modifier = Modifier.height(20.dp))
+
+        SettingSwitch("Auto Pause", autoPause) { autoPause = it }
+        SettingSwitch("Audio Cues", audioCues) { audioCues = it }
+        SettingSwitch("Current Pace", currentPace) { currentPace = it }
+        SettingSwitch("Cadence", cadence) { cadence = it }
+        SettingSwitch("Calories", calories) { calories = it }
+        SettingSwitch("Steps", steps) { steps = it }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Profile")
+                Text("Account")
+            }
+        }
+    }
+}
+
+@Composable
+fun SettingSwitch(
+    title: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 10.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(title)
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange
+            )
+        }
     }
 }
