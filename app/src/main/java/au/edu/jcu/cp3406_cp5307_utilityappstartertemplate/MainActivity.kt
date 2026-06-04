@@ -53,6 +53,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+data class RunRecord(
+    val date: String,
+    val time: String,
+    val duration: String,
+    val distance: String,
+    val pace: String,
+    val calories: String
+)
+
 @Preview(showBackground = true)
 @Composable
 fun UtilityAppPreview() {
@@ -63,11 +72,18 @@ fun UtilityAppPreview() {
 
 @Composable
 fun UtilityApp() {
-    var selectedTab by remember { mutableStateOf("Run") }
+    var selectedTab by remember { mutableStateOf("Home") }
+    var runRecords by remember { mutableStateOf(listOf<RunRecord>()) }
 
     Scaffold(
         bottomBar = {
             NavigationBar {
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                    label = { Text("Home") },
+                    selected = selectedTab == "Home",
+                    onClick = { selectedTab = "Home" }
+                )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.PlayArrow, contentDescription = "Run") },
                     label = { Text("Run") },
@@ -91,8 +107,18 @@ fun UtilityApp() {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedTab) {
-                "Run" -> RunScreen()
-                "Records" -> RecordsScreen()
+                "Home" -> HomeScreen()
+
+                "Run" -> RunScreen(
+                    onSaveRun = { record ->
+                        runRecords = runRecords + record
+                    }
+                )
+
+                "Records" -> RecordsScreen(
+                    runRecords = runRecords
+                )
+
                 "Settings" -> SettingsScreen()
             }
         }
@@ -100,7 +126,36 @@ fun UtilityApp() {
 }
 
 @Composable
-fun RunScreen() {
+fun HomeScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Home",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text("Current Location: Coming soon")
+                Text("Google Map: Coming soon")
+                Text("Weather: Coming soon")
+                Text("Today Distance: 0.00 km")
+                Text("Total Runs: 0")
+                Text("Calories Burned: 0 kcal")
+            }
+        }
+    }
+}
+
+
+@Composable
+fun RunScreen( onSaveRun: (RunRecord) -> Unit) {
     var runState by remember { mutableStateOf("Not Started") }
     var elapsedSeconds by remember { mutableIntStateOf(0) }
 
@@ -188,7 +243,7 @@ fun RunScreen() {
 }
 
 @Composable
-fun RecordsScreen() {
+fun RecordsScreen( runRecords: List<RunRecord>) {
     Column(
         modifier = Modifier
             .fillMaxSize()
