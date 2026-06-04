@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -52,16 +53,22 @@ fun UtilityAppPreview() {
 
 @Composable
 fun UtilityApp() {
-    var selectedTab by remember { mutableStateOf("Utility") }
+    var selectedTab by remember { mutableStateOf("Run") }
 
     Scaffold(
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Utility") },
-                    label = { Text("Utility") },
-                    selected = selectedTab == "Utility",
-                    onClick = { selectedTab = "Utility" }
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Run") },
+                    label = { Text("Run") },
+                    selected = selectedTab == "Run",
+                    onClick = { selectedTab = "Run" }
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.List, contentDescription = "Records") },
+                    label = { Text("Records") },
+                    selected = selectedTab == "Records",
+                    onClick = { selectedTab = "Records" }
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
@@ -74,7 +81,8 @@ fun UtilityApp() {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedTab) {
-                "Utility" -> UtilityScreen()
+                "Run" -> RunScreen()
+                "Records" -> RecordsScreen()
                 "Settings" -> SettingsScreen()
             }
         }
@@ -82,8 +90,8 @@ fun UtilityApp() {
 }
 
 @Composable
-fun UtilityScreen() {
-    var counter by remember { mutableIntStateOf(0) }
+fun RunScreen() {
+    var distance by remember { mutableIntStateOf(0) }
 
     Column(
         modifier = Modifier
@@ -91,12 +99,36 @@ fun UtilityScreen() {
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Utility Screen", style = MaterialTheme.typography.headlineMedium)
-        Text("Counter: $counter", style = MaterialTheme.typography.bodyLarge)
+        Text("Running Tracker", style = MaterialTheme.typography.headlineMedium)
 
-        Button(onClick = { counter++ }) {
-            Text("Increment")
+        Text("Distance: $distance km", style = MaterialTheme.typography.bodyLarge)
+
+        Button(onClick = { distance++ }) {
+            Text("Add 1 km")
         }
+
+        Text("Future features:")
+        Text("- Running timer")
+        Text("- Pace calculator")
+        Text("- Weather condition")
+        Text("- Map route")
+    }
+}
+
+@Composable
+fun RecordsScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text("Running Records", style = MaterialTheme.typography.headlineMedium)
+
+        Text("Your saved runs will appear here.")
+        Text("Example:")
+        Text("Run 1: 3 km")
+        Text("Run 2: 5 km")
     }
 }
 
@@ -105,8 +137,8 @@ fun SettingsScreen() {
     Column(
         Modifier
             .fillMaxSize()
-            .padding(24.dp), Arrangement.spacedBy(16.dp)
-    ) {
+            .padding(24.dp),
+        Arrangement.spacedBy(16.dp) ) {
         Text("Settings Screen", style = MaterialTheme.typography.headlineMedium)
         Text("This is where you can add toggles or preferences.")
     }
