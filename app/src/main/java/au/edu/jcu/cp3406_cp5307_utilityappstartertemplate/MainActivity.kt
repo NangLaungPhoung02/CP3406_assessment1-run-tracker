@@ -29,6 +29,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Card
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import au.edu.jcu.cp3406_cp5307_utilityappstartertemplate.ui.theme.CP3406_CP5603UtilityAppStarterTemplateTheme
 
 class MainActivity : ComponentActivity() {
@@ -59,7 +68,7 @@ fun UtilityApp() {
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Run") },
+                    icon = { Icon(Icons.Default.PlayArrow, contentDescription = "Run") },
                     label = { Text("Run") },
                     selected = selectedTab == "Run",
                     onClick = { selectedTab = "Run" }
@@ -91,27 +100,76 @@ fun UtilityApp() {
 
 @Composable
 fun RunScreen() {
-    var distance by remember { mutableIntStateOf(0) }
+    var runState by remember { mutableStateOf("Not Started") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Running Tracker", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = "Run Tracker",
+            style = MaterialTheme.typography.headlineMedium
+        )
 
-        Text("Distance: $distance km", style = MaterialTheme.typography.bodyLarge)
+        Spacer(modifier = Modifier.height(20.dp))
 
-        Button(onClick = { distance++ }) {
-            Text("Add 1 km")
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp)
+            ) {
+                Text("Status: $runState")
+                Text("Time: 00:00:00")
+                Text("Distance: 0.00 km")
+                Text("Pace: 0:00 /km")
+                Text("Speed: 0.0 km/h")
+                Text("Calories: 0 kcal")
+                Text("Steps: 0")
+                Text("Weather: Loading later")
+            }
         }
 
-        Text("Future features:")
-        Text("- Running timer")
-        Text("- Pace calculator")
-        Text("- Weather condition")
-        Text("- Map route")
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = { runState = "Running" },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Start Run")
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Button(
+            onClick = { runState = "Paused" },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = runState == "Running"
+        ) {
+            Text("Pause")
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Button(
+            onClick = { runState = "Running" },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = runState == "Paused"
+        ) {
+            Text("Resume")
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Button(
+            onClick = { runState = "Ended" },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = runState == "Running" || runState == "Paused"
+        ) {
+            Text("End Run")
+        }
     }
 }
 
@@ -125,21 +183,44 @@ fun RecordsScreen() {
     ) {
         Text("Running Records", style = MaterialTheme.typography.headlineMedium)
 
-        Text("Your saved runs will appear here.")
-        Text("Example:")
-        Text("Run 1: 3 km")
-        Text("Run 2: 5 km")
+        Card {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Example Record 1")
+                Text("Distance: 3 km")
+                Text("Time: 24 minutes")
+                Text("Pace: 8.00 min/km")
+            }
+        }
+
+        Card {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Example Record 2")
+                Text("Distance: 5 km")
+                Text("Time: 40 minutes")
+                Text("Pace: 8.00 min/km")
+            }
+        }
     }
 }
 
 @Composable
 fun SettingsScreen() {
     Column(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
-        Arrangement.spacedBy(16.dp) ) {
-        Text("Settings Screen", style = MaterialTheme.typography.headlineMedium)
-        Text("This is where you can add toggles or preferences.")
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text("Settings", style = MaterialTheme.typography.headlineMedium)
+
+        Text("App Preferences")
+        Text("Distance unit: Kilometres")
+        Text("Future option: Miles")
+        Text("Future option: Dark mode")
+        Text("Future option: Weather alerts")
     }
 }
