@@ -43,12 +43,26 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Switch
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.LinearProgressIndicator
+import android.Manifest
 import au.edu.jcu.cp3406_cp5307_utilityappstartertemplate.ui.theme.CP3406_CP5603UtilityAppStarterTemplateTheme
+import androidx.core.app.ActivityCompat
+import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
+
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ),
+            100
+        )
+
         setContent {
             CP3406_CP5603UtilityAppStarterTemplateTheme {
                 UtilityApp()
@@ -131,27 +145,53 @@ fun UtilityApp() {
 
 @Composable
 fun HomeScreen() {
+
+    val context = LocalContext.current
+
+    var location by remember {
+        mutableStateOf<LocationData?>(null)
+    }
+
+    val locationUtils = remember {
+        LocationUtils(context)
+    }
+
+    LaunchedEffect(Unit) {
+        locationUtils.getCurrentLocation {
+            location = it
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(20.dp)
     ) {
+
         Text(
-            text = "Home",
+            "Home",
             style = MaterialTheme.typography.headlineMedium
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text("Current Location: Coming soon")
-                Text("Google Map: Coming soon")
-                Text("Weather: Coming soon")
-                Text("Today Distance: 0.00 km")
-                Text("Total Runs: 0")
-                Text("Calories Burned: 0 kcal")
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+                Text("Current GPS Location")
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                if (location != null) {
+                    Text("Latitude: ${location!!.latitude}")
+                    Text("Longitude: ${location!!.longitude}")
+                } else {
+                    Text("Location unavailable")
+                }
             }
         }
     }
@@ -246,6 +286,11 @@ fun RunScreen( onSaveRun: (RunRecord) -> Unit) {
     }
 }
 
+
+data class LocationData(
+    val latitude: Double,
+    val longitude: Double
+)
 @Composable
 fun RecordsScreen(
     runRecords: List<RunRecord>
