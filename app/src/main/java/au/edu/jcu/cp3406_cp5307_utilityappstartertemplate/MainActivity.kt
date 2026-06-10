@@ -61,6 +61,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 
 
@@ -698,8 +700,9 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(backgroundColor)
+            .verticalScroll(rememberScrollState())
             .padding(24.dp)
-    ) {
+    )  {
         Text(
             text = "Settings",
             fontSize = 34.sp,
@@ -784,7 +787,7 @@ fun SettingsScreen(
             switchColor = switchColor
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(22.dp))
 
         UserProfileCard(
             isDarkMode = isDarkMode,
