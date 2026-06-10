@@ -4,64 +4,34 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Card
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import kotlinx.coroutines.delay
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Switch
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.LinearProgressIndicator
-import android.Manifest
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import au.edu.jcu.cp3406_cp5307_utilityappstartertemplate.ui.theme.CP3406_CP5603UtilityAppStarterTemplateTheme
-import androidx.core.app.ActivityCompat
-import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         enableEdgeToEdge()
-
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ),
-            100
-        )
 
         setContent {
             CP3406_CP5603UtilityAppStarterTemplateTheme {
@@ -80,14 +50,6 @@ data class RunRecord(
     val calories: String
 )
 
-@Preview(showBackground = true)
-@Composable
-fun UtilityAppPreview() {
-    CP3406_CP5603UtilityAppStarterTemplateTheme {
-        UtilityApp()
-    }
-}
-
 @Composable
 fun UtilityApp() {
     var selectedTab by remember { mutableStateOf("Home") }
@@ -102,18 +64,21 @@ fun UtilityApp() {
                     selected = selectedTab == "Home",
                     onClick = { selectedTab = "Home" }
                 )
+
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.PlayArrow, contentDescription = "Run") },
                     label = { Text("Run") },
                     selected = selectedTab == "Run",
                     onClick = { selectedTab = "Run" }
                 )
+
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.List, contentDescription = "Records") },
                     label = { Text("Records") },
                     selected = selectedTab == "Records",
                     onClick = { selectedTab = "Records" }
                 )
+
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
                     label = { Text("Settings") },
@@ -125,18 +90,11 @@ fun UtilityApp() {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedTab) {
-                "Home" -> HomeScreen()
-
-                "Run" -> RunScreen(
-                    onSaveRun = { record ->
-                        runRecords = runRecords + record
-                    }
-                )
-
-                "Records" -> RecordsScreen(
-                    runRecords = runRecords
-                )
-
+                "Home" -> HomeScreen(runRecords)
+                "Run" -> RunScreen { record ->
+                    runRecords = runRecords + record
+                }
+                "Records" -> RecordsScreen(runRecords)
                 "Settings" -> SettingsScreen()
             }
         }
@@ -144,62 +102,55 @@ fun UtilityApp() {
 }
 
 @Composable
-fun HomeScreen() {
-
-    val context = LocalContext.current
-
-    var location by remember {
-        mutableStateOf<LocationData?>(null)
-    }
-
-    val locationUtils = remember {
-        LocationUtils(context)
-    }
-
-    LaunchedEffect(Unit) {
-        locationUtils.getCurrentLocation {
-            location = it
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
-    ) {
-
-        Text(
-            "Home",
-            style = MaterialTheme.typography.headlineMedium
+fun HomeScreen(runRecords: List<RunRecord>) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.running_background),
+            contentDescription = "Running background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
+            Text(
+                text = "Running Tracker",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White
+            )
 
-                Text("Current GPS Location")
+            Spacer(modifier = Modifier.height(20.dp))
 
-                Spacer(modifier = Modifier.height(10.dp))
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Quick Statistics")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Total Runs: ${runRecords.size}")
+                    Text("Today Distance: 0.00 km")
+                    Text("Total Calories: 0 kcal")
+                    Text("Weather: Coming soon")
+                }
+            }
 
-                if (location != null) {
-                    Text("Latitude: ${location!!.latitude}")
-                    Text("Longitude: ${location!!.longitude}")
-                } else {
-                    Text("Location unavailable")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Motivation")
+                    Text("Every run gets you closer to your goal.")
                 }
             }
         }
     }
 }
 
-
 @Composable
-fun RunScreen( onSaveRun: (RunRecord) -> Unit) {
+fun RunScreen(
+    onSaveRun: (RunRecord) -> Unit
+) {
     var runState by remember { mutableStateOf("Not Started") }
     var elapsedSeconds by remember { mutableIntStateOf(0) }
 
@@ -221,10 +172,7 @@ fun RunScreen( onSaveRun: (RunRecord) -> Unit) {
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Run Tracker",
-            style = MaterialTheme.typography.headlineMedium
-        )
+        Text("Run Tracker", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -237,7 +185,7 @@ fun RunScreen( onSaveRun: (RunRecord) -> Unit) {
                 Text("Speed: 0.0 km/h")
                 Text("Calories: 0 kcal")
                 Text("Steps: 0")
-                Text("Weather: Loading later")
+                Text("Weather: Coming soon")
             }
         }
 
@@ -277,7 +225,23 @@ fun RunScreen( onSaveRun: (RunRecord) -> Unit) {
         Spacer(modifier = Modifier.height(10.dp))
 
         Button(
-            onClick = { runState = "Ended" },
+            onClick = {
+                runState = "Ended"
+
+                val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+                val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+
+                onSaveRun(
+                    RunRecord(
+                        date = currentDate,
+                        time = currentTime,
+                        duration = formattedTime,
+                        distance = "0.00 km",
+                        pace = "0:00 /km",
+                        calories = "0 kcal"
+                    )
+                )
+            },
             modifier = Modifier.fillMaxWidth(),
             enabled = runState == "Running" || runState == "Paused"
         ) {
@@ -286,23 +250,14 @@ fun RunScreen( onSaveRun: (RunRecord) -> Unit) {
     }
 }
 
-
-data class LocationData(
-    val latitude: Double,
-    val longitude: Double
-)
 @Composable
-fun RecordsScreen(
-    runRecords: List<RunRecord>
-) {
+fun RecordsScreen(runRecords: List<RunRecord>) {
     var showGoalScreen by remember { mutableStateOf(false) }
 
     if (showGoalScreen) {
-        GoalScreen(
-            onBack = {
-                showGoalScreen = false
-            }
-        )
+        GoalScreen {
+            showGoalScreen = false
+        }
     } else {
         Column(
             modifier = Modifier
@@ -314,9 +269,7 @@ fun RecordsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {
-                    showGoalScreen = true
-                },
+                onClick = { showGoalScreen = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Set Goal")
@@ -349,9 +302,7 @@ fun RecordsScreen(
 }
 
 @Composable
-fun GoalScreen(
-    onBack: () -> Unit
-) {
+fun GoalScreen(onBack: () -> Unit) {
     var targetWeight by remember { mutableStateOf("") }
     var targetDays by remember { mutableStateOf("") }
     var useKg by remember { mutableStateOf(true) }
@@ -361,18 +312,13 @@ fun GoalScreen(
             .fillMaxSize()
             .padding(20.dp)
     ) {
-        Button(
-            onClick = onBack
-        ) {
+        Button(onClick = onBack) {
             Text("Back to Records")
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = "Running Goals",
-            style = MaterialTheme.typography.headlineMedium
-        )
+        Text("Running Goals", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -380,10 +326,9 @@ fun GoalScreen(
             value = targetWeight,
             onValueChange = { targetWeight = it },
             label = {
-                Text(
-                    if (useKg) "Target Weight (kg)" else "Target Weight (lb)"
-                )
+                Text(if (useKg) "Target Weight (kg)" else "Target Weight (lb)")
             },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -393,14 +338,13 @@ fun GoalScreen(
             value = targetDays,
             onValueChange = { targetDays = it },
             label = { Text("Target Days") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Use KG")
             Spacer(modifier = Modifier.width(10.dp))
             Switch(
@@ -424,23 +368,13 @@ fun GoalScreen(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text("⭐ Premium Goal Tracking")
-
                 Spacer(modifier = Modifier.height(8.dp))
-
                 Text("Unlock advanced weight tracking, coaching, progress charts, and detailed analytics.")
-
                 Spacer(modifier = Modifier.height(10.dp))
-
-                Button(
-                    onClick = { }
-                ) {
+                Button(onClick = { }) {
                     Text("Upgrade to Premium")
                 }
             }
@@ -462,10 +396,7 @@ fun SettingsScreen() {
             .fillMaxSize()
             .padding(20.dp)
     ) {
-        Text(
-            text = "Settings",
-            style = MaterialTheme.typography.headlineMedium
-        )
+        Text("Settings", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -511,5 +442,13 @@ fun SettingSwitch(
                 onCheckedChange = onCheckedChange
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UtilityAppPreview() {
+    CP3406_CP5603UtilityAppStarterTemplateTheme {
+        UtilityApp()
     }
 }

@@ -1,9 +1,13 @@
 package au.edu.jcu.cp3406_cp5307_utilityappstartertemplate
 
-
 import android.annotation.SuppressLint
 import android.content.Context
 import com.google.android.gms.location.LocationServices
+
+data class LocationData(
+    val latitude: Double,
+    val longitude: Double
+)
 
 class LocationUtils(
     private val context: Context
@@ -21,8 +25,8 @@ class LocationUtils(
                 if (location != null) {
                     onLocationReceived(
                         LocationData(
-                            location.latitude,
-                            location.longitude
+                            latitude = location.latitude,
+                            longitude = location.longitude
                         )
                     )
                 } else {
