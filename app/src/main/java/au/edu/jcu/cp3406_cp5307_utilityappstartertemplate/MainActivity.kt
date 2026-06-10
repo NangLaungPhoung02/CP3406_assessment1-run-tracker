@@ -27,6 +27,9 @@ import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.material3.CardDefaults
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,6 +107,7 @@ fun UtilityApp() {
 @Composable
 fun HomeScreen(runRecords: List<RunRecord>) {
     Box(modifier = Modifier.fillMaxSize()) {
+
         Image(
             painter = painterResource(id = R.drawable.running_background),
             contentDescription = "Running background",
@@ -111,42 +115,84 @@ fun HomeScreen(runRecords: List<RunRecord>) {
             contentScale = ContentScale.Crop
         )
 
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(20.dp)
         ) {
-            Text(
-                text = "Running Tracker",
-                style = MaterialTheme.typography.headlineMedium,
-                color = Color.White
-            )
+            Column {
 
-            Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Running Tracker",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = Color.White
+                )
 
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Quick Statistics")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Total Runs: ${runRecords.size}")
-                    Text("Today Distance: 0.00 km")
-                    Text("Total Calories: 0 kcal")
-                    Text("Weather: Coming soon")
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Track your run, goals and progress",
+                    color = Color.White
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Black.copy(alpha = 0.75f)
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text("Today Overview", color = Color.White)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text("🏃 Total Runs: ${runRecords.size}", color = Color(0xFF39FF14))
+                        Text("📍 Today Distance: 0.00 km", color = Color(0xFF39FF14))
+                        Text("🔥 Total Calories: 0 kcal", color = Color(0xFF39FF14))
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Motivation")
-                    Text("Every run gets you closer to your goal.")
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Black.copy(alpha = 0.75f)
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text("Weather Condition", color = Color.White)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text("☁️ Condition: Partly Cloudy", color = Color(0xFF39FF14))
+                        Text("🌡 Temperature: 28°C", color = Color(0xFF39FF14))
+                        Text("💨 Wind: Light", color = Color(0xFF39FF14))
+                        Text("✅ Good time for a short run", color = Color(0xFF39FF14))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Black.copy(alpha = 0.75f)
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text("Motivation", color = Color.White)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Every step counts. Keep moving forward.",
+                            color = Color(0xFF39FF14)
+                        )
+                    }
                 }
             }
         }
     }
 }
-
 @Composable
 fun RunScreen(
     onSaveRun: (RunRecord) -> Unit
@@ -176,17 +222,48 @@ fun RunScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text("Status: $runState")
-                Text("Time: $formattedTime")
-                Text("Distance: 0.00 km")
-                Text("Pace: 0:00 /km")
-                Text("Speed: 0.0 km/h")
-                Text("Calories: 0 kcal")
-                Text("Steps: 0")
-                Text("Weather: Coming soon")
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.Black.copy(alpha = 0.75f)
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("TIME", color = Color.White)
+                Text(
+                    text = formattedTime,
+                    style = MaterialTheme.typography.displayMedium,
+                    color = Color(0xFF39FF14)
+                )
+                Text("Status: $runState", color = Color.White)
             }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+            StatCard("Distance", "0.00 km", Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(10.dp))
+            StatCard("Pace", "0:00 /km", Modifier.weight(1f))
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+            StatCard("Speed", "0.0 km/h", Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(10.dp))
+            StatCard("Calories", "0 kcal", Modifier.weight(1f))
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+            StatCard("Steps", "0", Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(10.dp))
+            StatCard("Weather", "Coming soon", Modifier.weight(1f))
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -204,22 +281,24 @@ fun RunScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Button(
-            onClick = { runState = "Paused" },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = runState == "Running"
-        ) {
-            Text("Pause")
-        }
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = { runState = "Paused" },
+                modifier = Modifier.weight(1f),
+                enabled = runState == "Running"
+            ) {
+                Text("Pause")
+            }
 
-        Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
-        Button(
-            onClick = { runState = "Running" },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = runState == "Paused"
-        ) {
-            Text("Resume")
+            Button(
+                onClick = { runState = "Running" },
+                modifier = Modifier.weight(1f),
+                enabled = runState == "Paused"
+            ) {
+                Text("Resume")
+            }
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -297,6 +376,28 @@ fun RecordsScreen(runRecords: List<RunRecord>) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun StatCard(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Black.copy(alpha = 0.75f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp)
+        ) {
+            Text(title, color = Color.White)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(value, color = Color(0xFF39FF14))
         }
     }
 }
