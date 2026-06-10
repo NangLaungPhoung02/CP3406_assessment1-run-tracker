@@ -52,6 +52,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 
 
@@ -698,7 +707,7 @@ fun SettingsScreen(
             color = textColor
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         SettingSwitchItem(
             title = "Dark Mode",
@@ -709,7 +718,7 @@ fun SettingsScreen(
             switchColor = switchColor
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         SettingSwitchItem(
             title = "Auto Pause",
@@ -720,7 +729,7 @@ fun SettingsScreen(
             switchColor = switchColor
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         SettingSwitchItem(
             title = "Audio Cues",
@@ -731,7 +740,7 @@ fun SettingsScreen(
             switchColor = switchColor
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         SettingSwitchItem(
             title = "Current Pace",
@@ -742,7 +751,7 @@ fun SettingsScreen(
             switchColor = switchColor
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         SettingSwitchItem(
             title = "Cadence",
@@ -753,7 +762,7 @@ fun SettingsScreen(
             switchColor = switchColor
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         SettingSwitchItem(
             title = "Calories",
@@ -764,7 +773,7 @@ fun SettingsScreen(
             switchColor = switchColor
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         SettingSwitchItem(
             title = "Steps",
@@ -775,34 +784,14 @@ fun SettingsScreen(
             switchColor = switchColor
         )
 
-        Spacer(modifier = Modifier.height(22.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(18.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = cardColor
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(18.dp)
-            ) {
-                Text(
-                    text = "Profile",
-                    color = textColor,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text(
-                    text = "Account",
-                    color = subTextColor,
-                    fontSize = 18.sp
-                )
-            }
-        }
+        UserProfileCard(
+            isDarkMode = isDarkMode,
+            cardColor = cardColor,
+            textColor = textColor,
+            subTextColor = subTextColor
+        )
     }
 }
 
@@ -818,8 +807,8 @@ fun SettingSwitchItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(72.dp),
-        shape = RoundedCornerShape(18.dp),
+            .height(68.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = cardColor
         )
@@ -834,7 +823,7 @@ fun SettingSwitchItem(
             Text(
                 text = title,
                 color = textColor,
-                fontSize = 20.sp,
+                fontSize = 19.sp,
                 fontWeight = FontWeight.Medium
             )
 
@@ -852,6 +841,155 @@ fun SettingSwitchItem(
     }
 }
 
+@Composable
+fun UserProfileCard(
+    isDarkMode: Boolean,
+    cardColor: Color,
+    textColor: Color,
+    subTextColor: Color
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = cardColor
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "User Profile",
+                    tint = textColor,
+                    modifier = Modifier.size(58.dp)
+                )
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "Navy",
+                        color = textColor,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "Runner Account",
+                        color = subTextColor,
+                        fontSize = 14.sp
+                    )
+
+                    Text(
+                        text = "Free Plan",
+                        color = subTextColor,
+                        fontSize = 13.sp
+                    )
+                }
+
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Open Profile",
+                    tint = subTextColor
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Divider(
+                color = if (isDarkMode) Color.DarkGray else Color.LightGray
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ProfileStatItem(
+                    title = "Total Runs",
+                    value = "12",
+                    textColor = textColor,
+                    subTextColor = subTextColor
+                )
+
+                ProfileStatItem(
+                    title = "Distance",
+                    value = "36.8 km",
+                    textColor = textColor,
+                    subTextColor = subTextColor
+                )
+
+                ProfileStatItem(
+                    title = "Calories",
+                    value = "2,430",
+                    textColor = textColor,
+                    subTextColor = subTextColor
+                )
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            Button(
+                onClick = { },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE53935),
+                    contentColor = Color.White
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ExitToApp,
+                    contentDescription = "Log Out"
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "Log Out",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ProfileStatItem(
+    title: String,
+    value: String,
+    textColor: Color,
+    subTextColor: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            color = textColor,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = title,
+            color = subTextColor,
+            fontSize = 12.sp
+        )
+    }
+}
 @Preview(showBackground = true)
 @Composable
 fun UtilityAppPreview() {
