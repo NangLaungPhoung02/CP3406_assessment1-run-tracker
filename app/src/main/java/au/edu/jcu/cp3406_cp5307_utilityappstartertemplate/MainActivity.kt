@@ -28,6 +28,30 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 
 
@@ -53,10 +77,13 @@ data class RunRecord(
     val calories: String
 )
 
+
 @Composable
 fun UtilityApp() {
     var selectedTab by remember { mutableStateOf("Home") }
     var runRecords by remember { mutableStateOf(listOf<RunRecord>()) }
+    var showGoalScreen by remember { mutableStateOf(false) }
+    var isDarkMode by remember { mutableStateOf(true) }
 
     Scaffold(
         bottomBar = {
@@ -97,8 +124,22 @@ fun UtilityApp() {
                 "Run" -> RunScreen { record ->
                     runRecords = runRecords + record
                 }
-                "Records" -> RecordsScreen(runRecords)
-                "Settings" -> SettingsScreen()
+                "Records" -> {
+                    if (showGoalScreen) {
+                        GoalScreen(
+                            onBack = { showGoalScreen = false }
+                        )
+                    } else {
+                        RecordsScreen(
+                            runRecords = runRecords,
+                            onSetGoalClick = { showGoalScreen = true }
+                        )
+                    }
+                }
+                "Settings" -> SettingsScreen(
+                    isDarkMode = isDarkMode,
+                    onDarkModeChange = { isDarkMode = it }
+                )
             }
         }
     }
@@ -329,56 +370,6 @@ fun RunScreen(
     }
 }
 
-@Composable
-fun RecordsScreen(runRecords: List<RunRecord>) {
-    var showGoalScreen by remember { mutableStateOf(false) }
-
-    if (showGoalScreen) {
-        GoalScreen {
-            showGoalScreen = false
-        }
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(20.dp)
-        ) {
-            Text("Run Records", style = MaterialTheme.typography.headlineMedium)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { showGoalScreen = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Set Goal")
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            if (runRecords.isEmpty()) {
-                Text("No run records yet.")
-            } else {
-                runRecords.forEach { record ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Date: ${record.date}")
-                            Text("Time: ${record.time}")
-                            Text("Duration: ${record.duration}")
-                            Text("Distance: ${record.distance}")
-                            Text("Pace: ${record.pace}")
-                            Text("Calories: ${record.calories}")
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun StatCard(
@@ -399,6 +390,199 @@ fun StatCard(
             Spacer(modifier = Modifier.height(4.dp))
             Text(value, color = Color(0xFF39FF14))
         }
+    }
+}
+
+data class FakeRunRecord(
+    val date: String,
+    val distance: String,
+    val time: String,
+    val pace: String,
+    val calories: String
+)
+
+@Composable
+fun RecordsScreen(
+    runRecords: List<RunRecord>,
+    onSetGoalClick: () -> Unit
+)  {
+    val sampleRecords = listOf(
+        FakeRunRecord("Today", "3.20 km", "22:15", "6'57\" /km", "180 kcal"),
+        FakeRunRecord("Yesterday", "2.50 km", "18:40", "7'28\" /km", "140 kcal"),
+        FakeRunRecord("Mon, 8 Jun", "5.00 km", "36:10", "7'14\" /km", "310 kcal")
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(24.dp)
+    ) {
+        Text(
+            text = "Run Records",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF39FF00)
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(
+            onClick = onSetGoalClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(28.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF39FF00),
+                contentColor = Color.Black
+            )
+        ) {
+            Text(
+                text = "Set Goal",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        SummaryCard()
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "Recent Runs",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF39FF00)
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(sampleRecords) { record ->
+                FakeRunRecordCard(record)
+            }
+        }
+    }
+}
+@Composable
+fun SummaryCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF101010)
+        ),
+        border = BorderStroke(1.dp, Color(0xFF39FF00))
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+            Text(
+                text = "This Week Summary",
+                color = Color(0xFF39FF00),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                SummaryItem("Distance", "10.7 km")
+                SummaryItem("Time", "1h 17m")
+                SummaryItem("Calories", "630")
+            }
+        }
+    }
+}
+
+@Composable
+fun SummaryItem(title: String, value: String) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            color = Color.White,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = title,
+            color = Color.Gray,
+            fontSize = 13.sp
+        )
+    }
+}
+
+@Composable
+fun FakeRunRecordCard(record: FakeRunRecord) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF141414)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = record.date,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = record.distance,
+                    color = Color(0xFF39FF00),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                RecordInfo("Time", record.time)
+                RecordInfo("Pace", record.pace)
+                RecordInfo("Calories", record.calories)
+            }
+        }
+    }
+}
+
+@Composable
+fun RecordInfo(title: String, value: String) {
+    Column {
+        Text(
+            text = title,
+            color = Color.Gray,
+            fontSize = 12.sp
+        )
+
+        Text(
+            text = value,
+            color = Color.White,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
@@ -484,7 +668,10 @@ fun GoalScreen(onBack: () -> Unit) {
 }
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    isDarkMode: Boolean,
+    onDarkModeChange: (Boolean) -> Unit
+) {
     var autoPause by remember { mutableStateOf(false) }
     var audioCues by remember { mutableStateOf(true) }
     var currentPace by remember { mutableStateOf(true) }
@@ -492,55 +679,174 @@ fun SettingsScreen() {
     var calories by remember { mutableStateOf(true) }
     var steps by remember { mutableStateOf(true) }
 
+    val backgroundColor = if (isDarkMode) Color.Black else Color(0xFFF5F5F5)
+    val cardColor = if (isDarkMode) Color(0xFF343139) else Color.White
+    val textColor = if (isDarkMode) Color(0xFF39FF00) else Color(0xFF111111)
+    val subTextColor = if (isDarkMode) Color.LightGray else Color.DarkGray
+    val switchColor = Color(0xFF39FF00)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
+            .background(backgroundColor)
+            .padding(24.dp)
     ) {
-        Text("Settings", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = "Settings",
+            fontSize = 34.sp,
+            fontWeight = FontWeight.Bold,
+            color = textColor
+        )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        SettingSwitch("Auto Pause", autoPause) { autoPause = it }
-        SettingSwitch("Audio Cues", audioCues) { audioCues = it }
-        SettingSwitch("Current Pace", currentPace) { currentPace = it }
-        SettingSwitch("Cadence", cadence) { cadence = it }
-        SettingSwitch("Calories", calories) { calories = it }
-        SettingSwitch("Steps", steps) { steps = it }
+        SettingSwitchItem(
+            title = "Dark Mode",
+            checked = isDarkMode,
+            onCheckedChange = onDarkModeChange,
+            cardColor = cardColor,
+            textColor = textColor,
+            switchColor = switchColor
+        )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Profile")
-                Text("Account")
+        SettingSwitchItem(
+            title = "Auto Pause",
+            checked = autoPause,
+            onCheckedChange = { autoPause = it },
+            cardColor = cardColor,
+            textColor = textColor,
+            switchColor = switchColor
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        SettingSwitchItem(
+            title = "Audio Cues",
+            checked = audioCues,
+            onCheckedChange = { audioCues = it },
+            cardColor = cardColor,
+            textColor = textColor,
+            switchColor = switchColor
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        SettingSwitchItem(
+            title = "Current Pace",
+            checked = currentPace,
+            onCheckedChange = { currentPace = it },
+            cardColor = cardColor,
+            textColor = textColor,
+            switchColor = switchColor
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        SettingSwitchItem(
+            title = "Cadence",
+            checked = cadence,
+            onCheckedChange = { cadence = it },
+            cardColor = cardColor,
+            textColor = textColor,
+            switchColor = switchColor
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        SettingSwitchItem(
+            title = "Calories",
+            checked = calories,
+            onCheckedChange = { calories = it },
+            cardColor = cardColor,
+            textColor = textColor,
+            switchColor = switchColor
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        SettingSwitchItem(
+            title = "Steps",
+            checked = steps,
+            onCheckedChange = { steps = it },
+            cardColor = cardColor,
+            textColor = textColor,
+            switchColor = switchColor
+        )
+
+        Spacer(modifier = Modifier.height(22.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = cardColor
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(18.dp)
+            ) {
+                Text(
+                    text = "Profile",
+                    color = textColor,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = "Account",
+                    color = subTextColor,
+                    fontSize = 18.sp
+                )
             }
         }
     }
 }
 
 @Composable
-fun SettingSwitch(
+fun SettingSwitchItem(
     title: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    cardColor: Color,
+    textColor: Color,
+    switchColor: Color
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 10.dp)
+            .height(72.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = cardColor
+        )
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .padding(horizontal = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(title)
+            Text(
+                text = title,
+                color = textColor,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium
+            )
+
             Switch(
                 checked = checked,
-                onCheckedChange = onCheckedChange
+                onCheckedChange = onCheckedChange,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.Black,
+                    checkedTrackColor = switchColor,
+                    uncheckedThumbColor = Color.Gray,
+                    uncheckedTrackColor = Color.Transparent
+                )
             )
         }
     }
