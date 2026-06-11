@@ -4,11 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
@@ -19,31 +30,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import au.edu.jcu.cp3406_cp5307_utilityappstartertemplate.ui.theme.CP3406_CP5603UtilityAppStarterTemplateTheme
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.compose.material3.CardDefaults
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.foundation.clickable
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,15 +63,24 @@ data class RunRecord(
     val calories: String
 )
 
-
 @Composable
 fun UtilityApp() {
     var selectedTab by remember { mutableStateOf("Home") }
     var runRecords by remember { mutableStateOf(listOf<RunRecord>()) }
+
     var showGoalScreen by remember { mutableStateOf(false) }
-    var isDarkMode by remember { mutableStateOf(true) }
     var showPremiumScreen by remember { mutableStateOf(false) }
     var showProfileScreen by remember { mutableStateOf(false) }
+
+    var isDarkMode by remember { mutableStateOf(true) }
+
+    // These settings control the Run screen
+    var showCurrentPace by remember { mutableStateOf(true) }
+    var showCalories by remember { mutableStateOf(true) }
+    var showSteps by remember { mutableStateOf(true) }
+    var showCadence by remember { mutableStateOf(false) }
+    var autoPause by remember { mutableStateOf(false) }
+    var audioCues by remember { mutableStateOf(true) }
 
     Scaffold(
         bottomBar = {
@@ -113,9 +118,17 @@ fun UtilityApp() {
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedTab) {
                 "Home" -> HomeScreen(runRecords)
-                "Run" -> RunScreen { record ->
-                    runRecords = runRecords + record
-                }
+
+                "Run" -> RunScreen(
+                    showCurrentPace = showCurrentPace,
+                    showCalories = showCalories,
+                    showSteps = showSteps,
+                    showCadence = showCadence,
+                    onRunFinished = { record ->
+                        runRecords = runRecords + record
+                    }
+                )
+
                 "Records" -> {
                     if (showPremiumScreen) {
                         PremiumScreen(
@@ -133,6 +146,7 @@ fun UtilityApp() {
                         )
                     }
                 }
+
                 "Settings" -> {
                     if (showProfileScreen) {
                         ProfileScreen(
@@ -142,7 +156,25 @@ fun UtilityApp() {
                         SettingsScreen(
                             isDarkMode = isDarkMode,
                             onDarkModeChange = { isDarkMode = it },
-                            onProfileClick = { showProfileScreen = true }
+                            onProfileClick = { showProfileScreen = true },
+
+                            showCurrentPace = showCurrentPace,
+                            onShowCurrentPaceChange = { showCurrentPace = it },
+
+                            showCalories = showCalories,
+                            onShowCaloriesChange = { showCalories = it },
+
+                            showSteps = showSteps,
+                            onShowStepsChange = { showSteps = it },
+
+                            showCadence = showCadence,
+                            onShowCadenceChange = { showCadence = it },
+
+                            autoPause = autoPause,
+                            onAutoPauseChange = { autoPause = it },
+
+                            audioCues = audioCues,
+                            onAudioCuesChange = { audioCues = it }
                         )
                     }
                 }
@@ -154,7 +186,6 @@ fun UtilityApp() {
 @Composable
 fun HomeScreen(runRecords: List<RunRecord>) {
     Box(modifier = Modifier.fillMaxSize()) {
-
         Image(
             painter = painterResource(id = R.drawable.running_background),
             contentDescription = "Running background",
@@ -168,7 +199,6 @@ fun HomeScreen(runRecords: List<RunRecord>) {
                 .padding(20.dp)
         ) {
             Column {
-
                 Text(
                     text = "Running Tracker",
                     style = MaterialTheme.typography.headlineLarge,
@@ -231,7 +261,7 @@ fun HomeScreen(runRecords: List<RunRecord>) {
                         Text("Motivation", color = Color.White)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            "Every step counts. Keep moving forward.",
+                            text = "Every step counts. Keep moving forward.",
                             color = Color(0xFF39FF14)
                         )
                     }
@@ -240,9 +270,14 @@ fun HomeScreen(runRecords: List<RunRecord>) {
         }
     }
 }
+
 @Composable
 fun RunScreen(
-    onSaveRun: (RunRecord) -> Unit
+    showCurrentPace: Boolean,
+    showCalories: Boolean,
+    showSteps: Boolean,
+    showCadence: Boolean,
+    onRunFinished: (RunRecord) -> Unit
 ) {
     var runState by remember { mutableStateOf("Not Started") }
     var elapsedSeconds by remember { mutableIntStateOf(0) }
@@ -262,18 +297,26 @@ fun RunScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Black)
+            .verticalScroll(rememberScrollState())
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Run Tracker", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = "Run Tracker",
+            style = MaterialTheme.typography.headlineMedium,
+            color = Color(0xFF39FF14),
+            fontWeight = FontWeight.Bold
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = Color.Black.copy(alpha = 0.75f)
-            )
+                containerColor = Color(0xFF101010)
+            ),
+            border = BorderStroke(1.dp, Color(0xFF39FF14))
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -293,27 +336,45 @@ fun RunScreen(
 
         Row(modifier = Modifier.fillMaxWidth()) {
             StatCard("Distance", "0.00 km", Modifier.weight(1f))
-            Spacer(modifier = Modifier.width(10.dp))
-            StatCard("Pace", "0:00 /km", Modifier.weight(1f))
+
+            if (showCurrentPace) {
+                Spacer(modifier = Modifier.width(10.dp))
+                StatCard("Pace", "0:00 /km", Modifier.weight(1f))
+            }
         }
 
         Spacer(modifier = Modifier.height(10.dp))
 
         Row(modifier = Modifier.fillMaxWidth()) {
             StatCard("Speed", "0.0 km/h", Modifier.weight(1f))
-            Spacer(modifier = Modifier.width(10.dp))
-            StatCard("Calories", "0 kcal", Modifier.weight(1f))
+
+            if (showCalories) {
+                Spacer(modifier = Modifier.width(10.dp))
+                StatCard("Calories", "0 kcal", Modifier.weight(1f))
+            }
         }
 
         Spacer(modifier = Modifier.height(10.dp))
 
         Row(modifier = Modifier.fillMaxWidth()) {
-            StatCard("Steps", "0", Modifier.weight(1f))
-            Spacer(modifier = Modifier.width(10.dp))
-            StatCard("Weather", "Coming soon", Modifier.weight(1f))
+            if (showSteps) {
+                StatCard("Steps", "0", Modifier.weight(1f))
+            }
+
+            if (showCadence) {
+                if (showSteps) {
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
+                StatCard("Cadence", "0 spm", Modifier.weight(1f))
+            }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(10.dp))
+
+        StatCard("Weather", "Coming soon", Modifier.fillMaxWidth())
+
+        Spacer(modifier = Modifier.height(10.dp))
+
 
         Button(
             onClick = {
@@ -321,7 +382,11 @@ fun RunScreen(
                 runState = "Running"
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = runState == "Not Started" || runState == "Ended"
+            enabled = runState == "Not Started" || runState == "Ended",
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF39FF14),
+                contentColor = Color.Black
+            )
         ) {
             Text("Start Run")
         }
@@ -357,7 +422,7 @@ fun RunScreen(
                 val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
                 val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
 
-                onSaveRun(
+                onRunFinished(
                     RunRecord(
                         date = currentDate,
                         time = currentTime,
@@ -369,13 +434,16 @@ fun RunScreen(
                 )
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = runState == "Running" || runState == "Paused"
+            enabled = runState == "Running" || runState == "Paused",
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFE53935),
+                contentColor = Color.White
+            )
         ) {
             Text("End Run")
         }
     }
 }
-
 
 @Composable
 fun StatCard(
@@ -386,8 +454,9 @@ fun StatCard(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
-            containerColor = Color.Black.copy(alpha = 0.75f)
-        )
+            containerColor = Color(0xFF101010)
+        ),
+        border = BorderStroke(1.dp, Color(0xFF39FF14))
     ) {
         Column(
             modifier = Modifier.padding(14.dp)
@@ -411,7 +480,7 @@ data class FakeRunRecord(
 fun RecordsScreen(
     runRecords: List<RunRecord>,
     onSetGoalClick: () -> Unit
-)  {
+) {
     val sampleRecords = listOf(
         FakeRunRecord("Today", "3.20 km", "22:15", "6'57\" /km", "180 kcal"),
         FakeRunRecord("Yesterday", "2.50 km", "18:40", "7'28\" /km", "140 kcal"),
@@ -469,12 +538,50 @@ fun RecordsScreen(
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            items(runRecords) { record ->
+                RunRecordCard(record)
+            }
+
             items(sampleRecords) { record ->
                 FakeRunRecordCard(record)
             }
         }
     }
 }
+
+@Composable
+fun RunRecordCard(record: RunRecord) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF141414)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+            Text(
+                text = "${record.date} at ${record.time}",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                RecordInfo("Duration", record.duration)
+                RecordInfo("Distance", record.distance)
+                RecordInfo("Calories", record.calories)
+            }
+        }
+    }
+}
+
 @Composable
 fun SummaryCard() {
     Card(
@@ -604,6 +711,8 @@ fun GoalScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Black)
+            .verticalScroll(rememberScrollState())
             .padding(20.dp)
     ) {
         Button(onClick = onBack) {
@@ -612,7 +721,11 @@ fun GoalScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text("Running Goals", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = "Running Goals",
+            style = MaterialTheme.typography.headlineMedium,
+            color = Color(0xFF39FF00)
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -639,7 +752,7 @@ fun GoalScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Use KG")
+            Text("Use KG", color = Color.White)
             Spacer(modifier = Modifier.width(10.dp))
             Switch(
                 checked = useKg,
@@ -649,7 +762,7 @@ fun GoalScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text("Goal Progress")
+        Text("Goal Progress", color = Color.White)
 
         LinearProgressIndicator(
             progress = { 0.35f },
@@ -658,7 +771,7 @@ fun GoalScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text("35% Completed")
+        Text("35% Completed", color = Color.White)
 
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -819,16 +932,27 @@ fun PremiumFeature(text: String) {
 @Composable
 fun SettingsScreen(
     isDarkMode: Boolean,
-    onDarkModeChange: (Boolean) -> Unit, onProfileClick :() -> Unit
+    onDarkModeChange: (Boolean) -> Unit,
+    onProfileClick: () -> Unit,
+
+    showCurrentPace: Boolean,
+    onShowCurrentPaceChange: (Boolean) -> Unit,
+
+    showCalories: Boolean,
+    onShowCaloriesChange: (Boolean) -> Unit,
+
+    showSteps: Boolean,
+    onShowStepsChange: (Boolean) -> Unit,
+
+    showCadence: Boolean,
+    onShowCadenceChange: (Boolean) -> Unit,
+
+    autoPause: Boolean,
+    onAutoPauseChange: (Boolean) -> Unit,
+
+    audioCues: Boolean,
+    onAudioCuesChange: (Boolean) -> Unit
 ) {
-
-    var autoPause by remember { mutableStateOf(false) }
-    var audioCues by remember { mutableStateOf(true) }
-    var currentPace by remember { mutableStateOf(true) }
-    var cadence by remember { mutableStateOf(false) }
-    var calories by remember { mutableStateOf(true) }
-    var steps by remember { mutableStateOf(true) }
-
     val backgroundColor = if (isDarkMode) Color.Black else Color(0xFFF5F5F5)
     val cardColor = if (isDarkMode) Color(0xFF343139) else Color.White
     val textColor = if (isDarkMode) Color(0xFF39FF00) else Color(0xFF111111)
@@ -841,7 +965,7 @@ fun SettingsScreen(
             .background(backgroundColor)
             .verticalScroll(rememberScrollState())
             .padding(24.dp)
-    )  {
+    ) {
         Text(
             text = "Settings",
             fontSize = 34.sp,
@@ -865,7 +989,7 @@ fun SettingsScreen(
         SettingSwitchItem(
             title = "Auto Pause",
             checked = autoPause,
-            onCheckedChange = { autoPause = it },
+            onCheckedChange = onAutoPauseChange,
             cardColor = cardColor,
             textColor = textColor,
             switchColor = switchColor
@@ -876,7 +1000,7 @@ fun SettingsScreen(
         SettingSwitchItem(
             title = "Audio Cues",
             checked = audioCues,
-            onCheckedChange = { audioCues = it },
+            onCheckedChange = onAudioCuesChange,
             cardColor = cardColor,
             textColor = textColor,
             switchColor = switchColor
@@ -886,8 +1010,8 @@ fun SettingsScreen(
 
         SettingSwitchItem(
             title = "Current Pace",
-            checked = currentPace,
-            onCheckedChange = { currentPace = it },
+            checked = showCurrentPace,
+            onCheckedChange = onShowCurrentPaceChange,
             cardColor = cardColor,
             textColor = textColor,
             switchColor = switchColor
@@ -897,8 +1021,8 @@ fun SettingsScreen(
 
         SettingSwitchItem(
             title = "Cadence",
-            checked = cadence,
-            onCheckedChange = { cadence = it },
+            checked = showCadence,
+            onCheckedChange = onShowCadenceChange,
             cardColor = cardColor,
             textColor = textColor,
             switchColor = switchColor
@@ -908,8 +1032,8 @@ fun SettingsScreen(
 
         SettingSwitchItem(
             title = "Calories",
-            checked = calories,
-            onCheckedChange = { calories = it },
+            checked = showCalories,
+            onCheckedChange = onShowCaloriesChange,
             cardColor = cardColor,
             textColor = textColor,
             switchColor = switchColor
@@ -919,8 +1043,8 @@ fun SettingsScreen(
 
         SettingSwitchItem(
             title = "Steps",
-            checked = steps,
-            onCheckedChange = { steps = it },
+            checked = showSteps,
+            onCheckedChange = onShowStepsChange,
             cardColor = cardColor,
             textColor = textColor,
             switchColor = switchColor
@@ -1265,6 +1389,7 @@ fun ProfileDetailRow(title: String, value: String) {
         )
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun UtilityAppPreview() {
