@@ -95,6 +95,7 @@ fun UtilityApp() {
     var runRecords by remember { mutableStateOf(listOf<RunRecord>()) }
     var showGoalScreen by remember { mutableStateOf(false) }
     var isDarkMode by remember { mutableStateOf(true) }
+    var showPremiumScreen by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -136,9 +137,14 @@ fun UtilityApp() {
                     runRecords = runRecords + record
                 }
                 "Records" -> {
-                    if (showGoalScreen) {
+                    if (showPremiumScreen) {
+                        PremiumScreen(
+                            onBack = { showPremiumScreen = false }
+                        )
+                    } else if (showGoalScreen) {
                         GoalScreen(
-                            onBack = { showGoalScreen = false }
+                            onBack = { showGoalScreen = false },
+                            onUpgradeClick = { showPremiumScreen = true }
                         )
                     } else {
                         RecordsScreen(
@@ -598,7 +604,10 @@ fun RecordInfo(title: String, value: String) {
 }
 
 @Composable
-fun GoalScreen(onBack: () -> Unit) {
+fun GoalScreen(
+    onBack: () -> Unit,
+    onUpgradeClick: () -> Unit
+) {
     var targetWeight by remember { mutableStateOf("") }
     var targetDays by remember { mutableStateOf("") }
     var useKg by remember { mutableStateOf(true) }
@@ -670,11 +679,151 @@ fun GoalScreen(onBack: () -> Unit) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Unlock advanced weight tracking, coaching, progress charts, and detailed analytics.")
                 Spacer(modifier = Modifier.height(10.dp))
-                Button(onClick = { }) {
+                Button(onClick = onUpgradeClick) {
                     Text("Upgrade to Premium")
                 }
             }
         }
+    }
+}
+
+@Composable
+fun PremiumScreen(onBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(24.dp)
+    ) {
+        Button(
+            onClick = onBack,
+            shape = RoundedCornerShape(28.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF39FF00),
+                contentColor = Color.Black
+            )
+        ) {
+            Text(
+                text = "Back to Goals",
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        Text(
+            text = "Run Premium",
+            color = Color(0xFF39FF00),
+            fontSize = 36.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Upgrade your running experience",
+            color = Color.LightGray,
+            fontSize = 18.sp
+        )
+
+        Spacer(modifier = Modifier.height(26.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(26.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF343139)
+            ),
+            border = BorderStroke(1.dp, Color(0xFF39FF00))
+        ) {
+            Column(
+                modifier = Modifier.padding(22.dp)
+            ) {
+                Text(
+                    text = "⭐ Premium Plan",
+                    color = Color(0xFF39FF00),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Text(
+                    text = "$4.99 / month",
+                    color = Color.White,
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = "Cancel anytime",
+                    color = Color.LightGray,
+                    fontSize = 14.sp
+                )
+
+                Spacer(modifier = Modifier.height(22.dp))
+
+                PremiumFeature("Advanced weight tracking")
+                PremiumFeature("Personal running goals")
+                PremiumFeature("Progress charts")
+                PremiumFeature("Calories and pace analytics")
+                PremiumFeature("Coaching tips")
+                PremiumFeature("Unlimited goal history")
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF39FF00),
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text(
+                        text = "Start Premium",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "This is a demo premium page for the assignment. No real payment is required.",
+            color = Color.Gray,
+            fontSize = 13.sp
+        )
+    }
+}
+
+@Composable
+fun PremiumFeature(text: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 6.dp)
+    ) {
+        Text(
+            text = "✓",
+            color = Color(0xFF39FF00),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Text(
+            text = text,
+            color = Color.White,
+            fontSize = 16.sp
+        )
     }
 }
 
