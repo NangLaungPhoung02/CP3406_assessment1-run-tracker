@@ -1194,7 +1194,7 @@ fun ProfileScreen(onBack: () -> Unit) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "Nang Laung Phoung",
+                    text = "Navy",
                     color = Color(0xFF39FF00),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
