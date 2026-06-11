@@ -13,43 +13,107 @@ It provides the structure for a simple tabular UI using **Jetpack Compose** and 
 3. Run on an emulator or physical device (API 26+ recommended)  
 
 ---
+# Run Tracker App
 
-## Composables
+## Project Description
 
-### UtilityApp()
-- Contains the screen layout using a Scaffold
-- Toggles content between Utility and Settings
+Run Tracker App is an Android mobile application designed to help users track their running activities. The app allows users to start, pause, resume, and stop a running session while viewing useful running information such as time, distance, pace, calories, steps, and weather information.
 
-### UtilityScreen()
-- Displays a simple counter (replace with your utility logic)  
-- Includes a button to increment the counter
+The app also includes a records page where users can view their previous running history and a settings page where users can control different running preferences such as auto pause, audio cues, pace display, cadence, calories, and steps.
 
-### SettingsScreen()
-- Placeholder for user preferences or configuration  
-- Can be extended to modify main screen behavior (e.g., theme, units, limits)  
+This project was developed for CP3406 Mobile Computing using Android Studio and Jetpack Compose.
 
 ---
 
-## Key Concepts Covered
+## Features
 
-| Week | Concept                        | Used In                          |
-|------|--------------------------------|----------------------------------|
-| 1    | Kotlin + Android Studio         | MainActivity.kt |
-| 2    | Jetpack Compose Layouts         | UtilityApp(), UtilityScreen(), SettingsScreen()   |
-| 3    | Material Design 3               | CP3406_CP5603UtilityAppStarterTemplateTheme, MaterialTheme.typography |
-| 4    | ViewModel | Not included in starter          |
-| 5    | Retrofit  | Not included in starter          |
+### Home Page
+- Displays a professional running app home screen
+- Shows useful running information
+- Includes weather condition display
+- Provides quick access to the main running features
+
+### Run Page
+- Start running session
+- Pause running session
+- Resume running session
+- End running session
+- Display running timer
+- Show running details such as:
+  - Distance
+  - Pace
+  - Calories
+  - Steps
+  - Weather condition
+
+### Records Page
+- Displays previous running records
+- Shows information such as:
+  - Date
+  - Time
+  - Distance
+  - Pace
+  - Calories burned
+- Includes goal setting feature
+- Goal page allows users to set:
+  - Target weight
+  - Target number of days
+- Premium upgrade page is included as part of the goal feature
+
+### Settings Page
+- Allows users to turn running preferences on or off
+- Settings include:
+  - Auto Pause
+  - Audio Cues
+  - Current Pace
+  - Cadence
+  - Calories
+  - Steps
+- Includes user account section
+- Includes profile and logout option
 
 ---
 
-## Suggested Extensions
-- Replace counter with a real utility (e.g., hydration tracker, timer)  
-- Add a ViewModel for state management  
-- Use SharedPreferences or DataStore to persist settings  
-- Add a simple API call using Retrofit (e.g., fetch weather or quotes)  
+## Technologies Used
+
+- Kotlin
+- Android Studio
+- Jetpack Compose
+- Material 3
+- Android Navigation
+- Location Services
+- GitHub for version control
 
 ---
+
+## App Screens
+
+The app contains the following main screens:
+
+1. Home Screen
+2. Run Screen
+3. Records Screen
+4. Goal Setting Screen
+5. Upgrade to Premium Screen
+6. Settings Screen
+7. User Account Screen
+
+---
+
+## Project Structure
+
+```text
+app/
+ └── src/
+     └── main/
+         └── java/
+             └── au/edu/jcu/cp3406_cp5307_utilityappstartertemplate/
+                 ├── MainActivity.kt
+                 ├── LocationUtils.kt
+                 └── ui/theme/
+                     ├── Color.kt
+                     ├── Theme.kt
+                     └── Type.kt
 
 ## 📚 License
 This template is provided for educational use in CP3406.  
-Feel free to modify and extend it for your assessment.
