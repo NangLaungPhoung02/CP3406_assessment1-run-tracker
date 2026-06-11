@@ -54,6 +54,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+//Data used to store one completed run.
+//Each record is saved when the user presses End run.
 data class RunRecord(
     val date: String,
     val time: String,
@@ -63,8 +65,12 @@ data class RunRecord(
     val calories: String
 )
 
+// Main app composable.
+// This function controls bottom navigation and stores shared app state.
 @Composable
 fun UtilityApp() {
+    // Settings state used to control what information is displayed on the Run screen.
+    // These values are stored in UtilityApp so both SettingsScreen and RunScreen can access them.
     var selectedTab by remember { mutableStateOf("Home") }
     var runRecords by remember { mutableStateOf(listOf<RunRecord>()) }
 
@@ -82,6 +88,7 @@ fun UtilityApp() {
     var autoPause by remember { mutableStateOf(false) }
     var audioCues by remember { mutableStateOf(true) }
 
+    // Bottom navigation allows the user to switch between Home, Run, Records, and Settings.
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -118,6 +125,8 @@ fun UtilityApp() {
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedTab) {
                 "Home" -> HomeScreen(runRecords)
+                // Pass selected settings to the Run screen.
+                // The Run screen uses these values to show or hide pace, calories, steps, and cadence.
 
                 "Run" -> RunScreen(
                     showCurrentPace = showCurrentPace,
@@ -147,6 +156,8 @@ fun UtilityApp() {
                     }
                 }
 
+                // Settings screen updates the shared setting values.
+                // When a switch is changed, the Run screen updates immediately.
                 "Settings" -> {
                     if (showProfileScreen) {
                         ProfileScreen(
@@ -183,9 +194,13 @@ fun UtilityApp() {
     }
 }
 
+
+// Home screen shows a quick overview of the running app.
+// It provides at-a-glance information such as total runs, weather, and motivation.
 @Composable
 fun HomeScreen(runRecords: List<RunRecord>) {
     Box(modifier = Modifier.fillMaxSize()) {
+        //Background image gives the home page a more professional running app.
         Image(
             painter = painterResource(id = R.drawable.running_background),
             contentDescription = "Running background",
@@ -272,6 +287,8 @@ fun HomeScreen(runRecords: List<RunRecord>) {
 }
 
 @Composable
+// Run screen displays the main running timer and statistics.
+// Some statistics are controlled by switches from the Settings screen.
 fun RunScreen(
     showCurrentPace: Boolean,
     showCalories: Boolean,
@@ -282,6 +299,8 @@ fun RunScreen(
     var runState by remember { mutableStateOf("Not Started") }
     var elapsedSeconds by remember { mutableIntStateOf(0) }
 
+    //timer starts counting when the run state is running.
+    //It pauses automatically when the state changes to paused or ended.
     LaunchedEffect(runState) {
         while (runState == "Running") {
             delay(1000)
@@ -289,6 +308,7 @@ fun RunScreen(
         }
     }
 
+    //Converts total seconds to HH/MM/SS format for the timer display.
     val hours = elapsedSeconds / 3600
     val minutes = (elapsedSeconds % 3600) / 60
     val seconds = elapsedSeconds % 60
@@ -337,6 +357,7 @@ fun RunScreen(
         Row(modifier = Modifier.fillMaxWidth()) {
             StatCard("Distance", "0.00 km", Modifier.weight(1f))
 
+            // These cards only appear when the matching setting is turned on.
             if (showCurrentPace) {
                 Spacer(modifier = Modifier.width(10.dp))
                 StatCard("Pace", "0:00 /km", Modifier.weight(1f))
@@ -375,7 +396,7 @@ fun RunScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-
+        // Start button resets the timer and begins a new running session.
         Button(
             onClick = {
                 elapsedSeconds = 0
@@ -393,7 +414,9 @@ fun RunScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
+        // Pause and Resume buttons allow the user to control the running timer.
         Row(modifier = Modifier.fillMaxWidth()) {
+            //End button stop the run and saves a new run record with the current date, time and duration.
             Button(
                 onClick = { runState = "Paused" },
                 modifier = Modifier.weight(1f),
@@ -445,6 +468,7 @@ fun RunScreen(
     }
 }
 
+// Reusable card component for displaying one running statistic.
 @Composable
 fun StatCard(
     title: String,
@@ -476,6 +500,7 @@ data class FakeRunRecord(
     val calories: String
 )
 
+// Records screen displays previous run history and gives access to the goal setting feature.
 @Composable
 fun RecordsScreen(
     runRecords: List<RunRecord>,
@@ -549,6 +574,7 @@ fun RecordsScreen(
     }
 }
 
+// Records screen displays previous run history and gives access to the goal setting feature.
 @Composable
 fun RunRecordCard(record: RunRecord) {
     Card(
@@ -582,6 +608,7 @@ fun RunRecordCard(record: RunRecord) {
     }
 }
 
+// Summary card gives the user a quick weekly running overview.
 @Composable
 fun SummaryCard() {
     Card(
@@ -699,6 +726,8 @@ fun RecordInfo(title: String, value: String) {
     }
 }
 
+// Goal screen allows the user to enter a target weight and target number of days.
+// It also includes a premium upgrade option as part of the app design.
 @Composable
 fun GoalScreen(
     onBack: () -> Unit,
@@ -789,6 +818,8 @@ fun GoalScreen(
     }
 }
 
+// Premium screen demonstrates an upgrade page for advanced goal tracking features.
+// This is only a demo page and does not process real payments.
 @Composable
 fun PremiumScreen(onBack: () -> Unit) {
     Column(
@@ -929,6 +960,8 @@ fun PremiumFeature(text: String) {
     }
 }
 
+// Settings screen allows the user to customise the app display.
+// Some switches control which statistics are shown on the Run screen.
 @Composable
 fun SettingsScreen(
     isDarkMode: Boolean,
@@ -1062,6 +1095,7 @@ fun SettingsScreen(
     }
 }
 
+// Reusable switch row used for each setting option.
 @Composable
 fun SettingSwitchItem(
     title: String,
@@ -1108,6 +1142,7 @@ fun SettingSwitchItem(
     }
 }
 
+// User profile card shows basic account information and opens the profile screen when clicked.
 @Composable
 fun UserProfileCard(
     isDarkMode: Boolean,
@@ -1261,6 +1296,7 @@ fun ProfileStatItem(
     }
 }
 
+// Profile screen displays user account details and running progress information.
 @Composable
 fun ProfileScreen(onBack: () -> Unit) {
     Column(
