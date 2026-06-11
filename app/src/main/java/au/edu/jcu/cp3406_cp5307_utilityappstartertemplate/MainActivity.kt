@@ -34,36 +34,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.foundation.clickable
 
 
 class MainActivity : ComponentActivity() {
@@ -96,6 +77,7 @@ fun UtilityApp() {
     var showGoalScreen by remember { mutableStateOf(false) }
     var isDarkMode by remember { mutableStateOf(true) }
     var showPremiumScreen by remember { mutableStateOf(false) }
+    var showProfileScreen by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -153,10 +135,19 @@ fun UtilityApp() {
                         )
                     }
                 }
-                "Settings" -> SettingsScreen(
-                    isDarkMode = isDarkMode,
-                    onDarkModeChange = { isDarkMode = it }
-                )
+                "Settings" -> {
+                    if (showProfileScreen) {
+                        ProfileScreen(
+                            onBack = { showProfileScreen = false }
+                        )
+                    } else {
+                        SettingsScreen(
+                            isDarkMode = isDarkMode,
+                            onDarkModeChange = { isDarkMode = it },
+                            onProfileClick = { showProfileScreen = true }
+                        )
+                    }
+                }
             }
         }
     }
@@ -830,8 +821,9 @@ fun PremiumFeature(text: String) {
 @Composable
 fun SettingsScreen(
     isDarkMode: Boolean,
-    onDarkModeChange: (Boolean) -> Unit
+    onDarkModeChange: (Boolean) -> Unit, onProfileClick :() -> Unit
 ) {
+
     var autoPause by remember { mutableStateOf(false) }
     var audioCues by remember { mutableStateOf(true) }
     var currentPace by remember { mutableStateOf(true) }
@@ -942,7 +934,8 @@ fun SettingsScreen(
             isDarkMode = isDarkMode,
             cardColor = cardColor,
             textColor = textColor,
-            subTextColor = subTextColor
+            subTextColor = subTextColor,
+            onProfileClick = onProfileClick
         )
     }
 }
@@ -998,10 +991,13 @@ fun UserProfileCard(
     isDarkMode: Boolean,
     cardColor: Color,
     textColor: Color,
-    subTextColor: Color
+    subTextColor: Color,
+    onProfileClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onProfileClick() },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = cardColor
@@ -1139,6 +1135,135 @@ fun ProfileStatItem(
             text = title,
             color = subTextColor,
             fontSize = 12.sp
+        )
+    }
+}
+
+@Composable
+fun ProfileScreen(onBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(24.dp)
+    ) {
+        Button(
+            onClick = onBack,
+            shape = RoundedCornerShape(28.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF39FF00),
+                contentColor = Color.Black
+            )
+        ) {
+            Text(
+                text = "Back to Settings",
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        Text(
+            text = "User Profile",
+            color = Color(0xFF39FF00),
+            fontSize = 36.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(26.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF343139)
+            ),
+            border = BorderStroke(1.dp, Color(0xFF39FF00))
+        ) {
+            Column(
+                modifier = Modifier.padding(22.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "Profile",
+                    tint = Color(0xFF39FF00),
+                    modifier = Modifier.size(90.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Nang Laung Phoung",
+                    color = Color(0xFF39FF00),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "Runner Account",
+                    color = Color.LightGray,
+                    fontSize = 16.sp
+                )
+
+                Spacer(modifier = Modifier.height(22.dp))
+
+                ProfileDetailRow("Plan", "Free Plan")
+                ProfileDetailRow("Total Runs", "12")
+                ProfileDetailRow("Total Distance", "36.8 km")
+                ProfileDetailRow("Calories Burned", "2,430 kcal")
+                ProfileDetailRow("Goal Progress", "35%")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(22.dp))
+
+        Button(
+            onClick = { },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp),
+            shape = RoundedCornerShape(18.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFE53935),
+                contentColor = Color.White
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Default.ExitToApp,
+                contentDescription = "Log Out"
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = "Log Out",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun ProfileDetailRow(title: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 9.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = title,
+            color = Color.LightGray,
+            fontSize = 16.sp
+        )
+
+        Text(
+            text = value,
+            color = Color(0xFF39FF00),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }
